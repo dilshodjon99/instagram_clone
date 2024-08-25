@@ -1,8 +1,10 @@
 import re
+import os
 import threading
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from rest_framework.exceptions import ValidationError
+from twilio.rest import Client
 
 
 email_regex = re.compile(r"^[a-zA-Z0-9_.±]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$")
@@ -59,3 +61,17 @@ def send_email(email, code):
             'content_type': 'html'
         }
     )
+
+# def send_phone_code(phone, code):
+#     account_sid = os.environ["TWILIO_ACCOUNT_SID"]
+#     auth_token = os.environ["TWILIO_ACCOUNT_TOKEN"]
+#
+#     client = Client(account_sid, auth_token)
+#
+#     message = client.messages.create(
+#         to="+15558675309",
+#         from_="+15017250604",
+#         body="Hello from Python!")
+
+
+

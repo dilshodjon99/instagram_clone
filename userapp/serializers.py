@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import password_changed, validate_password
 from rest_framework import serializers
 from .models import *
 from rest_framework.exceptions import ValidationError
@@ -87,3 +88,67 @@ class SignUpSerializer(serializers.ModelSerializer):
         data.update(instance.token())
 
         return data
+
+
+class ChangeUserSerializer(serializers.Serializer):
+    first_name = serializers.CharField(write_only=True, required=True)
+    last_name = serializers.CharField(write_only=True, required=True)
+    username = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=True)
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, data):
+        password = data.get('password', None)
+        confirm_password = data.get('confirm_password', None)
+
+        if password != confirm_password:
+            data= {
+                'message': 'Password do not match'
+            }
+            raise ValidationError(data)
+
+        if password:
+            validate_password(password)
+            validate_password(confirm_password)
+
+        return data
+
+    def validate_username(self, username):
+        if len(username) < 5 or len(username) > 20:
+            data = {
+                'message': "Username must be between 5 and 20 characters"
+            }
+            raise ValidationError(data)
+
+        if username.isdigit():
+            data = {
+                'message': 'Username must be unique'
+            }
+            raise ValidationError(data)
+
+        if User.objects.filter(username=username).exists():
+            data = {
+                'message': 'Username already taken'
+            }
+            raise ValidationError(data)
+        return username
+
+def update(self, instance, validated_data):
+    instance.first_name = validated_data.get('firstname', instance.first_name)
+    instance.last_name = validated_data.get('last_name', instance.last_name)
+    instance.username = validated_data.get('username', instance.username)
+    instance.password = validated_data.get('password', instance.password)
+
+    if validated_data.get('password'):
+        instance.set_password(validated_data.get('password'))
+
+    if instance.auth_status in [CODE_VERIFIED, PHOTO_DONE]:
+        instance.auth_status = DONE
+    else:
+        data = {
+            'message': 'Auth status is invalid'
+        }
+        raise ValidationError(data)
+    instance.save()
+    return instance
+

@@ -8,7 +8,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 ORDINARY_USER, MANAGER, ADMIN = ('ordinary_user', 'manager', 'admin')
 VIA_EMAIL, VIA_PHONE = ('via_email', 'via_phone')
-NEW, COD_VERIFIED, DONE = ('new', 'cod_verified', 'done')
+NEW, CODE_VERIFIED, DONE, PHOTO_DONE, FORGET_PASS, NEW_PHONE = ('new', 'code_verified', 'done',
+                                                                'photo_done', 'forget_password', 'new_phone')
 
 
 class BaseModel(models.Model):
@@ -36,7 +37,7 @@ class User(AbstractUser, BaseModel):
 
     AUTH_STATUS = (
         (NEW, NEW),
-        (COD_VERIFIED, COD_VERIFIED),
+        (CODE_VERIFIED, CODE_VERIFIED),
         (DONE, DONE),
     )
 
